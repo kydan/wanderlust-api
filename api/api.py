@@ -4,8 +4,7 @@ from flask import Flask
 from flask import render_template
 from flask import jsonify
 
-# constants
-ROOT = 'json'
+from lib import wandb
 
 app = Flask(__name__)
 
@@ -14,37 +13,31 @@ def get_root():
   api_paths = ['/phones','/networks','/countries','/reports']
   return render_template('root.html', paths=api_paths)
     
-@app.route('/phones',methods=['GET'])
-def get_phones():
-  js_data = read_json(ROOT + '/phones.json')
-  #js_data['data'].append({'foo':'bar'}) #<== Example of how we can add data to our base json objects
-  return jsonify(js_data)
-
-@app.route('/networks',methods=['GET'])
-def get_networks():
-  js_data = read_json(ROOT + '/networks.json')
-  return jsonify(js_data)
-
-@app.route('/countries',methods=['GET'])
-def get_countries():
-  js_data = read_json(ROOT + '/countries.json')
-  return jsonify(js_data)
+@app.route('/phones/',methods=['GET'])
+@app.route('/phones/<id>',methods=['GET'])
+def get_phones(id=None):
+  data = wandb.phones(id)
+  return jsonify(data)
   
-@app.route('/reports',methods=['GET'])
+@app.route('/networks/',methods=['GET'])
+@app.route('/networks/<id>',methods=['GET'])
+def get_networks(id=None):
+  data = wandb.networks(id)
+  return jsonify(data)
+
+@app.route('/countries/',methods=['GET'])
+@app.route('/countries/<id>',methods=['GET'])
+def get_countries(id=None):
+  data = wandb.countries(id)
+  return jsonify(data)
+  
+@app.route('/reports/',methods=['GET'])
 def get_reports():
-  js_data = read_json(ROOT + '/reports.json')
-  return jsonify(js_data)
+  data = wandb.reports()
+  return jsonify(data)
   
-# Helper method to read the flat json
-def read_json(file_path):
-  json_data = open(file_path, 'r')
-  data = json.load(json_data)
-  json_data.close()
-  return data
-
 if __name__ == "__main__":
-  port = int(os.environ['PORT'])
-  host = os.environ['IP']
+  port = 8080 
+  host = '0.0.0.0'
   app.run(debug=True,port=port,host=host)
-
 
